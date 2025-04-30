@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Reservation Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .dual-slider {
+            position: relative;
+            height: 40px;
+            width: 100%;
+            margin: 30px 0;
+        }
+        
+        .dual-slider input[type="range"] {
+            position: absolute;
+            width: 100%;
+            pointer-events: none;
+            -webkit-appearance: none;
+            height: 5px;
+            background: transparent;
+            outline: none;
+        }
+        
+        .dual-slider input[type="range"]::-webkit-slider-thumb {
+            pointer-events: all;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .dual-slider input[type="range"]::-moz-range-thumb {
+            pointer-events: all;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 5px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .slider-range {
+            position: absolute;
+            height: 5px;
+            background: #93c5fd;
+            border-radius: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .time-marker {
+            position: absolute;
+            top: -10px;
+            width: 2px;
+            height: 25px;
+            background: #ef4444;
+            transform: translateX(-50%);
+        }
+        
+        .time-bubble {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #3b82f6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .ideal-bubble {
+            background: #ef4444;
+            top: 25px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .submit-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Custom time input styling */
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(0.5);
+        }
+        
+        input[type="time"]::-webkit-datetime-edit-ampm-field {
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-12">
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-white rounded-xl shadow-xl overflow-hidden">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
+                    <div class="flex items-center">
+                        <i class="fas fa-robot text-3xl mr-4"></i>
+                        <div>
+                            <h1 class="text-2xl font-bold">AI Reservation Assistant</h1>
+                            <p class="opacity-90">Let our AI handle your restaurant booking</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Form -->
+                <div class="p-6 md:p-8">
+                    <form id="reservationForm" class="space-y-6">
+                        <!-- Name -->
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-user mr-2 text-blue-500"></i> Your Name
+                            </label>
+                            <input type="text" id="name" required 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                   placeholder="John Doe">
+                        </div>
+                        
+                        <!-- Phone Number -->
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-phone mr-2 text-blue-500"></i> Your Phone Number
+                            </label>
+                            <input type="tel" id="phone" required 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                   placeholder="(123) 456-7890">
+                        </div>
+                        
+                        <!-- Restaurant Phone -->
+                        <div>
+                            <label for="restaurantPhone" class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-utensils mr-2 text-blue-500"></i> Restaurant Phone Number
+                            </label>
+                            <input type="tel" id="restaurantPhone" required 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                   placeholder="(987) 654-3210">
+                        </div>
+                        
+                        <!-- Party Size -->
+                        <div>
+                            <label for="partySize" class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-users mr-2 text-blue-500"></i> Party Size
+                            </label>
+                            <select id="partySize" required 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                <option value="" disabled selected>Select number of people</option>
+                                <option value="1">1 person</option>
+                                <option value="2">2 people</option>
+                                <option value="3">3 people</option>
+                                <option value="4">4 people</option>
+                                <option value="5">5 people</option>
+                                <option value="6">6 people</option>
+                                <option value="7">7 people</option>
+                                <option value="8">8 people</option>
+                                <option value="9">9 people</option>
+                                <option value="10">10+ people</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Ideal Time -->
+                        <div>
+                            <label for="idealTime" class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-clock mr-2 text-blue-500"></i> Ideal Reservation Time
+                            </label>
+                            <input type="time" id="idealTime" required step="300" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                                   min="08:00" max="23:00">
+                        </div>
+                        
+                        <!-- Time Flexibility Slider -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                <i class="fas fa-sliders-h mr-2 text-blue-500"></i> Time Flexibility
+                            </label>
+                            <div class="dual-slider">
+                                <div class="slider-track"></div>
+                                <div class="slider-range" id="sliderRange"></div>
+                                <div class="time-marker" id="idealMarker"></div>
+                                
+                                <input type="range" min="540" max="1260" step="15" value="660" id="earliestTime">
+                                <input type="range" min="540" max="1260" step="15" value="900" id="latestTime">
+                                
+                                <div class="time-bubble" id="earliestTimeValue">11:00 AM</div>
+                                <div class="time-bubble" id="latestTimeValue">3:00 PM</div>
+                                <div class="time-bubble ideal-bubble" id="idealTimeValue">12:00 PM</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="pt-4">
+                            <button type="submit" class="submit-btn w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-6 rounded-lg font-semibold shadow-md hover:shadow-lg transition flex items-center justify-center">
+                                <i class="fas fa-paper-plane mr-2"></i> Make Reservation Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Success Message (Hidden by default) -->
+            <div id="successMessage" class="hidden mt-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative">
+                <strong class="font-bold">Success!</strong>
+                <span class="block sm:inline">Your reservation request has been sent to our AI assistant.</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <i class="fas fa-check"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Convert minutes to time string (e.g., 720 -> "12:00 PM")
+        function minutesToTime(minutes) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            const displayHours = hours % 12 || 12;
+            return `${displayHours}:${mins.toString().padStart(2, '0')} ${ampm}`;
+        }
+        
+        // Convert time string to minutes (e.g., "13:30" -> 810)
+        function timeToMinutes(timeString) {
+            if (!timeString) return 720; // Default to noon if empty
+            const [hours, minutes] = timeString.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+        
+        // Update slider positions and range fill
+        function updateSlider() {
+            const earliest = parseInt(document.getElementById('earliestTime').value);
+            const latest = parseInt(document.getElementById('latestTime').value);
+            const ideal = timeToMinutes(document.getElementById('idealTime').value);
+            
+            // Ensure earliest is not greater than latest
+            if (earliest > latest) {
+                document.getElementById('earliestTime').value = latest;
+                document.getElementById('latestTime').value = earliest;
+                updateSlider();
+                return;
+            }
+            
+            // Update displayed time values
+            document.getElementById('earliestTimeValue').textContent = minutesToTime(earliest);
+            document.getElementById('latestTimeValue').textContent = minutesToTime(latest);
+            document.getElementById('idealTimeValue').textContent = minutesToTime(ideal);
+            
+            // Position the bubbles
+            const sliderWidth = document.querySelector('.dual-slider').offsetWidth;
+            const minPos = (earliest - 540) / (1260 - 540) * sliderWidth;
+            const maxPos = (latest - 540) / (1260 - 540) * sliderWidth;
+            const idealPos = (ideal - 540) / (1260 - 540) * sliderWidth;
+            
+            document.getElementById('earliestTimeValue').style.left = `${minPos}px`;
+            document.getElementById('latestTimeValue').style.left = `${maxPos}px`;
+            document.getElementById('idealTimeValue').style.left = `${idealPos}px`;
+            
+            // Update range fill
+            document.getElementById('sliderRange').style.left = `${minPos}px`;
+            document.getElementById('sliderRange').style.width = `${maxPos - minPos}px`;
+            
+            // Position ideal marker
+            document.getElementById('idealMarker').style.left = `${idealPos}px`;
+        }
+        
+        // Initialize slider and event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default ideal time to current time rounded to nearest 5 minutes
+            const now = new Date();
+            const minutes = Math.round(now.getMinutes() / 5) * 5;
+            const defaultTime = `${now.getHours().toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            document.getElementById('idealTime').value = defaultTime;
+            
+            // Initialize slider
+            updateSlider();
+            
+            // Add event listeners
+            document.getElementById('earliestTime').addEventListener('input', updateSlider);
+            document.getElementById('latestTime').addEventListener('input', updateSlider);
+            document.getElementById('idealTime').addEventListener('change', updateSlider);
+        });
+        
+        // Handle form submission
+        document.getElementById('reservationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Create reservation object
+            const reservation = {
+                name: document.getElementById('name').value,
+                phone: document.getElementById('phone').value,
+                restaurantPhone: document.getElementById('restaurantPhone').value,
+                partySize: document.getElementById('partySize').value,
+                idealTime: document.getElementById('idealTime').value,
+                earliestTime: minutesToTime(parseInt(document.getElementById('earliestTime').value)),
+                latestTime: minutesToTime(parseInt(document.getElementById('latestTime').value))
+            };
+            
+            // In a real application, you would send this to your backend
+            console.log('Reservation data:', reservation);
+            
+            // For this demo, we'll just show the success message
+            showSuccess();
+        });
+        
+        // Show success message and reset form
+        function showSuccess() {
+            document.getElementById('reservationForm').reset();
+            document.getElementById('successMessage').classList.remove('hidden');
+            
+            // Reset slider positions
+            document.getElementById('earliestTime').value = 660;
+            document.getElementById('latestTime').value = 900;
+            
+            // Set default ideal time to current time
+            const now = new Date();
+            const minutes = Math.round(now.getMinutes() / 5) * 5;
+            const defaultTime = `${now.getHours().toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            document.getElementById('idealTime').value = defaultTime;
+            
+            updateSlider();
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                document.getElementById('successMessage').classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
